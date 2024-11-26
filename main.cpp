@@ -29,10 +29,10 @@ struct Operator {
 };
 
 struct DXVoice {
-  Operator op1;
-  Operator op2;
-  Operator op3;
   Operator op4;
+  Operator op3;
+  Operator op2;
+  Operator op1;
 
   int lfo_sync{0};   // same b
   int feedback{0};   // same b
@@ -166,10 +166,10 @@ Operator ExtractOperatorValues() {
 
 DXVoice ExtractDXVoiceValues() {
   DXVoice voice;
-  voice.op1 = ExtractOperatorValues();
-  voice.op2 = ExtractOperatorValues();
-  voice.op3 = ExtractOperatorValues();
   voice.op4 = ExtractOperatorValues();
+  voice.op3 = ExtractOperatorValues();
+  voice.op2 = ExtractOperatorValues();
+  voice.op1 = ExtractOperatorValues();
 
   int sy_fbl_algorithm = GetData();
   voice.lfo_sync = (sy_fbl_algorithm & 0x40) >> 6;
@@ -237,18 +237,19 @@ std::string DumpSBOp(Operator op, int num) {
   ss << "::m_op" << num << "_output_lvl=" << op.out << "::m_op" << num
      << "_ratio=" << dx_ratios[op.frequency_ratio] << "::m_op" << num
      << "_detune_cents=" << Scaley(op.detune, 0, 6, -2.6, 2.6) << "::m_eg"
-     << num << "_attack_ms=" << Scaley(31 - op.attack_rate, 0, 31, 0, 1000)
+     << num << "_attack_ms=" << Scaley(31 - op.attack_rate, 0, 31, 5, 3000)
      << "::m_eg" << num
-     << "_decay_ms=" << Scaley(31 - op.decay1_rate, 0, 31, 0, 1000) << "::m_eg"
-     << num << "_release_ms=" << Scaley(15 - op.release_rate, 0, 15, 0, 1000)
+     << "_decay_ms=" << Scaley(31 - op.decay1_rate, 0, 31, 4, 3000) << "::m_eg"
+     << num << "_release_ms=" << Scaley(15 - op.release_rate, 0, 15, 5, 3000)
      << "::m_eg" << num
-     << "_sustain_lvl=" << Scaley(15 - op.decay1_level, 0, 15, 0, 1);
+     << "_sustain_lvl=" << Scaley(op.decay1_level, 0, 15, 0, 1);
   return ss.str();
 }
 void DumpSBVoice(DXVoice voice) {
+  if (voice.name.compare("init_voice") == 0) return;
   std::stringstream ss;
   ss << "::name=" << voice.name << "::m_voice_mode=" << voice.algorithm
-     << "::m_op4_feedback=" << Scaley(voice.feedback, 0, 7, 0, 99)
+     << "::m_op4_feedback=" << Scaley(voice.feedback, 0, 7, 0, 10)
      << DumpSBOp(voice.op1, 1) << DumpSBOp(voice.op2, 2)
      << DumpSBOp(voice.op3, 3) << DumpSBOp(voice.op4, 4);
 
